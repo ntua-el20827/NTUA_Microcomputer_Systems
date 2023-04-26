@@ -1,0 +1,15 @@
+﻿START:
+	MVI C,08H
+	LDA 2000H
+FIR_LOOP:
+	RAL 		; αριστερη περιστροφη
+	JC SEC_LOOP	; jump αν υπαρχει κρατουμενο
+	DCR C
+	JNZ FIR_LOOP	; αν c!=0 ξανα το loop
+SEC_LOOP:
+	MOV A,C
+	CMA
+	STA 3000H
+	JMP START 	; Το προγραμμα τρεχει συνεχως	
+
+END

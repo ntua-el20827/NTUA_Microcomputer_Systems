@@ -1,0 +1,45 @@
+	IN 10H
+	LXI B,0320H	;Καθυστέρηση 800ms
+START:
+	LDA 2000H	 
+	CPI 63H		;ελεγχος αν ειναι μεγαλύτερο του 99
+	JNC GREATER_THAN_99
+	MVI D,FFH 	; Το συμπληρωμα ως προς 2 ειναι το -1
+	
+DECA:
+	INR D
+	SUI 0AH
+	JNC DECA	; Ελέγχουμε αν εχουμε αρνητικό αριθμό
+	ADI 0AH	
+	MOV E,A		; Κρατάμε τις μονάδες
+	MOV A,D		; Παιρνάω τις δεκαδες στο Α
+	RLC		; 4 Περιστροφές για να μεταφέρουμε τις δεκάδες απο τα 
+	RLC		; 	LSB στα MSB
+	RLC
+	RLC
+	ADD E 		; Προσθεση στις δεκάδες τις μονάδες
+	CMA
+	STA 3000H	; Αποθηκευση στην διευθυνση που αντιστοιχει στις θύρες εξόδου LEDs
+	JMP START
+
+GREATER_THAN_99:
+	CPI C7H
+	JNC GREATER_THAN_199	; Ελεγχος αν ειναι μεγαλύτερο απο 199
+	MVI A,F0H		; Αναβοσβηνουν τα LSB LEDs
+	STA 3000H		; με καθυστερηση 800 ms
+	CALL DELB
+	MVI A,FFH
+	STA 3000H
+	CALL DELB
+	JMP START	
+
+GREATER_THAN_199:		
+	MVI A,0FH		; Αναβοσβηνουν τα ΜSB LEDs
+	STA 3000H		; με καθυστερηση 800 ms
+	CALL DELB
+	MVI A,FFH
+	STA 3000H
+	CALL DELB
+	JMP START
+
+	END
