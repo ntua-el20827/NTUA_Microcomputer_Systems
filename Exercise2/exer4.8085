@@ -1,0 +1,84 @@
+START:
+	LDA 2000H
+	MOV B,A		;Αποθηκεύω το input απο τα switches
+CHECK_1:	;A7xorA6
+	XRI 80H		;Axor10000000
+	MOV C,A		;C = A
+	MOV A,B		
+	XRI 40H		;A 
+	RLC
+	XRA C		;A XOR C
+	ANI 80H
+	MOV D,A		;D7
+CHECK_2:	;A5xorA4
+	MOV A,B
+	XRI 20H		;
+	MOV C,A		;C = A = xxAxxxx
+	MOV A,B		
+	XRI 10H		;A 
+	RLC
+	XRA C		;A XOR C
+	ANI 20H
+	RLC
+	RLC
+	MOV E,A	
+	JMP OR1	
+CHECK_3:	;A3andA2
+	MOV A,B
+	ANI 08H		;
+	MOV C,A		;C = A
+	MOV A,B		;A is equal to the input of dip switches
+	ANI 04H		;A 
+	RLC
+	ANA C		;A3 AND A2 / RESULT IN A3 
+	ANI 08H
+	RLC
+	RLC
+	XRA D
+	MOV D,A		;D5 OK	
+		
+CHECK_4:	;A1andA0
+	MOV A,B
+	ANI 02H		;
+	MOV E,A		;C = A
+	MOV A,B		;A is equal to the input of dip switches
+	ANI 01H		;A 
+	RLC
+	ANA E		;A1 AND A0
+	ANI 02H
+	MOV E,A	;E1
+	JMP OR2
+OR1:	;Αποθηκευση D7 και D6
+	MOV A,E		
+	ANI 80H
+	ORA D		; A7 
+	RRC
+	XRA D
+	MOV D,A		 
+	JMP CHECK_3
+OR2:	;Αποθηκευση D5 και D4
+	MOV A,E		;D5 ηδη αποθηκευμενο
+	ANI 02H
+	RLC
+	RLC
+	RLC
+	RLC		; GO TO D5
+	ANI 20H
+	ORA D
+	RRC
+	ANI 10H
+	XRA D
+	MOV D,A
+
+LEDS:
+	MOV A,D		;Μετακίνηση των D7D6D5D4 στα LSB
+	RLC
+	RLC
+	RLC
+	RLC
+	ANI 0FH
+	CMA
+	STA 3000H
+	JMP START
+	
+	END

@@ -1,0 +1,142 @@
+START:	
+	IN 10H		 
+	LXI H,0A00H	;Θεση μνήμης 0Α00Η
+	MVI B,04H	;Β=4
+FIR_LOOP:		;Αρχικοποίηση της μνήμης / Χωρίς αυτο εμφανίζει και τα 6 display
+	MVI M,10H				; Εγω θέλω μόνο τα πρώτα 2
+	INX H
+	DCR B
+	JNZ FIR_LOOP
+;Σαρωση για κάθε γραμμή
+LINE0:	
+	MVI A,F7H	;11110111 : πορτα σάρωσης
+	STA 2800H	
+	LDA 1800H	;Διαβάζω τις στήλες
+	ANI 07H		;Κρατάω τα 3 LSB, τα υπόλοιπα δεν με ενδιαφέρουν
+	MVI D,01H	;(1)
+	CPI 06H		;χχχχχ110
+	JZ DISPLAY	
+	MVI D,02H	;(2)
+	CPI 05H		;χχχχχ101
+	JZ DISPLAY	 
+	MVI D,03H	;(3)
+	CPI 03H		;χχχχχ011
+	JZ DISPLAY
+LINE1:	
+	MVI A,EFH	;11101111
+	STA 2800H	
+	LDA 1800H	 
+	ANI 07H		
+	MVI D,04H
+	CPI 06H		;(4)
+	JZ DISPLAY
+	MVI D,05H
+	CPI 05H		;(5)
+	JZ DISPLAY
+	MVI D,06H
+	CPI 03H		;(6)
+	JZ DISPLAY
+LINE2:	
+	MVI A,DFH	;11011111
+	STA 2800H	
+	LDA 1800H	 
+	ANI 07H		
+	MVI D,07H
+	CPI 06H		;(7)
+	JZ DISPLAY
+	MVI D,08H
+	CPI 05H		;(8)
+	JZ DISPLAY
+	MVI D,09H
+	CPI 03H		;(9)
+	JZ DISPLAY
+LINE3:	
+	MVI A,BFH	;10111111
+	STA 2800H	
+	LDA 1800H	 
+	ANI 07H		
+	MVI D,0AH
+	CPI 06H		;(A)
+	JZ DISPLAY
+	MVI D,0BH
+	CPI 05H		;(B)
+	JZ DISPLAY
+	MVI D,0CH
+	CPI 03H		;(C)
+	JZ DISPLAY
+LINE4:	
+	MVI A,7FH	;01111111
+	STA 2800H	
+	LDA 1800H	 
+	ANI 07H		
+	MVI D,0DH
+	CPI 06H		;(D)
+	JZ DISPLAY
+	MVI D,0EH
+	CPI 05H		;(E)
+	JZ DISPLAY
+	MVI D,0FH
+	CPI 03H		;(F)
+	JZ DISPLAY
+
+;Πρεπει να κάνω το ίδιο και για τα υπόλοιπα κουμπιά
+LINE5:	
+	MVI A,FBH	;11111011
+	STA 2800H	
+	LDA 1800H	 
+	ANI 07H		
+	MVI D,00H	
+	CPI 06H		;(0)
+	JZ DISPLAY	
+	MVI D,10H	
+	CPI 05H		;(STORE/INCR)
+	JZ DISPLAY	 
+	MVI D,11H	 
+	CPI 03H		;(DECR)
+	JZ DISPLAY
+LINE6:	
+	MVI A,FEH	;11111110
+	STA 2800H	
+	LDA 1800H	
+	ANI 07H			
+	MVI D,12H	;(INSTR_STEP)
+	CPI 06H		
+	JZ DISPLAY	
+	MVI D,13H	;(FETCH_PC)
+	CPI 05H	
+	JZ DISPLAY
+	
+LINE7:	
+	MVI A,FDH	;11111101
+	STA 2800H	
+	LDA 1800H	 
+	ANI 07H		
+	MVI D,14H	
+	CPI 06H		;(RUN)	
+	JZ DISPLAY	
+	MVI D,15H	
+	CPI 05H		;(FETCH_REG)
+	JZ DISPLAY	 
+	MVI D,16H	 
+	CPI 03H		;(FETCH_ADDRS)
+	JZ DISPLAY	
+	JMP START
+DISPLAY:	
+	LXI H,0A04H	;Θεση των LSB
+	MOV A,D
+	ANI 0FH		;4LSB
+	MOV M,A		
+	INX H		
+	MOV A,D	
+	ANI F0H		;4MSB
+	RLC
+	RLC		
+	RLC
+	RLC	
+	MOV M,A		
+	LXI D,0A00H		
+	CALL STDM	
+	CALL DCD		
+	JMP START
+
+	END 	

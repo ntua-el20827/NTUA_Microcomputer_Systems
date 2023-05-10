@@ -1,0 +1,22 @@
+START:
+	CALL KIND
+	CPI 00H		;Ελεγχος =0
+	JZ WRONG
+	CPI 09H		;Ελεγχος <9
+	JNC WRONG
+	MOV B,A		
+	MVI A,00H	;A = 0
+FIR_LOOP:
+	DCR B
+	JZ LEDS
+	RLC		;Βαζω 1 στις θέσεις του Α που πρέπει
+	INR A
+	JMP FIR_LOOP
+LEDS:
+	STA 3000H
+	JMP START
+WRONG:
+	MVI A,FFH	;Κανένα LED ανοικτό
+	STA 3000H
+	JMP START
+	END

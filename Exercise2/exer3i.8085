@@ -1,0 +1,26 @@
+START:
+	MVI C,08H
+	LDA 2000H
+	MVI B,00H	; Β ειναι η θέση η οποία πρεπει να ανάψει	
+FIR_LOOP:
+	RAR 		; δεξιά περιστροφη
+	JC SEC_LOOP_HELP	; jump αν βρηκαμε ασσο
+	INR B
+	DCR C
+	JNZ FIR_LOOP	; αν c!=0 ξανα το loop
+RESTART:
+	MVI A,FFH
+	STA 3000H	;Κανένα LED ανοικτό
+	JMP START
+SEC_LOOP_HELP:
+	MVI A,FEH
+SEC_LOOP:
+	;Τωρα το Β δειχνει την θέση που πρέπει να ανάψει
+	RLC
+	DCR B
+	JNZ SEC_LOOP
+	;CMA
+	STA 3000H
+	JMP START 	; Το προγραμμα τρεχει συνεχως	
+
+	END

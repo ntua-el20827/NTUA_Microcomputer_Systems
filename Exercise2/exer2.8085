@@ -1,0 +1,51 @@
+	LXI B,0064H		; 64Η = 100 -> 100ms αρα 0.1s
+	MVI D,C8H 		; D=200 για να έχω 200επανάληψεις->20δευτερόλεπτα
+START:
+	LDA 2000H		;Φορτωνω στο Α τα switches 
+	RLC			;Τσεκαρω το MSB επαναληπτικά μεχρι να ειναι OFF
+	JNC EXER2_OFF		;Αν CY=A7=0 πήγαινε στο OFF
+	JMP START
+EXER2_OFF:			;Τωρα ειναι OFF - Περιμένω το πρωτο ON οπου μετά θα περιμένω το OFF
+	LDA 2000H	
+	RLC
+	JC EXER2_ON		;Τωρα περιμένω να γίνει ΟΝ και αν ναι πάω στο ON
+	JMP EXER2_OFF		 
+EXER2_ON:
+	MVI D,C8H 		; D=200 για να έχω 200επανάληψεις->20δευτερόλεπτα		
+	LDA 2000H 		;Τωρα περιμένω το OFF για να ενεργοποιηθεί το push-button
+	RLC
+	JNC LOOP_20S	 
+	JMP EXER2_ON
+	
+LOOP_20S:			;Loop για 20 δευτερόλεπτα
+	LDA 2000H	
+	RLC		
+	JC ON_WHILE_LEDS
+	JMP LED_AND_CHECK
+
+LED_AND_CHECK:
+	MVI A,00H		;Α=0 ωστε να ανάψουν όλα τα LEDs (ανάποδη λογική)
+	STA 3000H	
+	CALL DELB		;Καθυστέρηση
+	DCR D		
+	JNZ LOOP_20S	
+	MVI A,FFH
+	STA 3000H	
+	JMP EXER2_OFF		; Αν τελειώσουν τα 20s κλείσε τα LED και πήγαινε στο OFF
+
+ON_WHILE_LEDS:			
+	LDA 2000H		
+	RLC			
+	JNC RESTART_LOOP	; Αν ξανέρθει OFF ξεκίνα τον timer απο την αρχή απο το RESTART_LOOP
+	MVI A,00H		; Αλλιώς συνεχίζει η λειτουργία του LOOP_20s, χωρίς τo LED_AND_CHECK
+	STA 3000H
+	CALL DELB
+	DCR D
+	JNZ ON_WHILE_LEDS
+	MVI A,FFH
+	STA 3000H
+	JMP EXER2_OFF
+RESTART_LOOP:			;Απο την αρχή το delay routine των 20 δευτερολεπτων
+	MVI D,C8H
+	JMP LOOP_20S
+	END
