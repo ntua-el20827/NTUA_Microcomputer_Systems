@@ -1,0 +1,65 @@
+	IN 10H	
+	MVI A,10H		;Αρχικοποίηση του 7-segment
+	STA 0B00H		
+	STA 0B01H		
+	STA 0B02H		
+	STA 0B03H		
+	STA 0B04H		
+	STA 0B05H		
+	
+	MVI A,0DH		;Ενεργοποίηση διακοπής RST 6.5
+	SIM				
+	EI
+MAIN_PROGRAM:	
+	JMP MAIN_PROGRAM
+INTR_ROUTINE:
+	CALL KIND 	;Εισοδος απο το πληκτρολόγιο -> Μονάδες
+	STA 0B04H
+	CALL DISPLAY 
+	MOV B,A 	
+	CALL KIND	;Εισοδος απο το πληκτρολόγιο -> Δεκάδες
+	STA 0B05H 	
+	CALL DISPLAY
+	MVI D,32H		;K1 = 50
+	MVI E,C8H		;K2 = 200
+	RLC 		
+	RLC
+	RLC
+	RLC
+	ORA B		
+	MOV B,A		;Ο Tελικός Αριθμός ειναι το L 
+	EI
+	MOV A,B
+	CMP D 		;Συγκριση με το Κ1
+	JC RANGE1 	
+	JZ RANGE1 	
+	CMP E 		;Συγκριση με το Κ2
+	JC RANGE2 
+	JZ RANGE2 
+	MVI A,FBH 	;Σε όποια αλλη περίπτωση ανοίγω το 3ο LSB LED
+	STA 3000H	
+	RET
+
+DISPLAY:
+	PUSH PSW
+	PUSH H
+	PUSH D
+	PUSH B
+	LXI D,0B00H   
+	CALL STDM
+	CALL DCD
+	POP B
+	POP D
+	POP H
+	POP PSW
+	RET
+RANGE1:
+	MVI A,FEH 	; 1o LSB LED
+	STA 3000H	
+	RET
+RANGE2:
+	MVI A,FDH 	; 2o LSB LED
+	STA 3000H	
+	RET
+	
+	END

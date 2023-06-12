@@ -1,0 +1,67 @@
+	IN 10H
+	MVI A,10H
+	;Βαζω σε όλες τις θέσεις μνήμης το περιεχόμενο του Α
+	STA 0B00H 
+	STA 0B01H 
+	STA 0B02H 
+	STA 0B03H 
+	STA 0B04H 
+	STA 0B05H
+	MVI A,0DH		
+	SIM			;Ενεργοποίηση της Μασκας Διακοπών
+;Τα περιεχόμενα του συσσωρευτή χρησιμοποιούνται για προγραμματισμό της μασκας διακοπών 
+	EI 			;Ενεργοποίηση των Interrupts
+INF_LOOP:
+	JMP INF_LOOP	
+INTR_ROUTINE:
+	POP H
+	EI			
+	MVI A,00H 		
+	STA 3000H
+	MVI D,06H 		; Θα κάνουμε 6 επαναλήψεις για τα 60 δευτερόλεπτα	
+	MOV A,D
+	DCR A			
+	STA 0B01H		; Τοποθετώ αρχικά τις δεκάδες στον 7-segment
+RELOAD_SECONDS:
+	MVI A,09H		; Seconds = 9	
+BIG_LOOP:
+	STA 0B00H		; Τοποθετώ τα δευτερόλεπτα στο 7-segment
+	CALL SCREEN		; Τυπωνω την τιμή 
+	DCR A 			; Μειώνω κατα 1 τα δευτερόλεπτα
+	CPI 00H 		
+	JNZ BIG_LOOP	 	
+	MVI A,00H
+	STA 0B00H
+	CALL SCREEN
+	DCR D			;Ελεγχος για τις Δεκάδες
+	JZ EXIT			
+	MOV A,D
+	DCR A		
+	STA 0B01H
+	JMP RELOAD_SECONDS	
+SCREEN:				;Ανανέωση της οθόνης
+	LXI B,0064H 				
+	PUSH PSW		; Store το Α και το Flag
+	PUSH H
+	PUSH D
+	PUSH B
+	LXI D,0B00H
+	CALL STDM
+	MVI A,0AH		
+SMALL_LOOP:
+	CALL DCD			
+	CALL DELB
+	DCR A
+	CPI 00H
+	JNZ SMALL_LOOP
+	POP B
+	POP D			; Επαναφορά του D
+	POP H
+	POP PSW
+	RET	
+EXIT:
+	MVI A,FFH 		; Σβηνω τα LEDs
+	STA 3000H 
+	JMP INF_LOOP			
+	
+	END
