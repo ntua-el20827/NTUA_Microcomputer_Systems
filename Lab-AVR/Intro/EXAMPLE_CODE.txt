@@ -1,0 +1,118 @@
+;******************************************************************
+;                               EXAMPLE1
+;******************************************************************
+.include "m328PBdef.inc"
+.equ NUM=9
+
+reset:
+    ldi r24 , low(RAMEND)	; initialize stack pointer
+    out SPL , r24
+    ldi r24 , high(RAMEND)
+    out SPH , r24
+    
+start:
+    LDI Zh, HIGH(Table*2)   ; Ζ(zl=R30, zh=R31) <-- Table address 
+    LDI Zl, LOW(Table*2)    ; multiply by two for byte access	
+			    
+    ldi r21,NUM		    	; load number
+ 
+    clr	r18
+    add zl, r21		    	;  access the appropriate table element
+    adc zh, r18 
+ 
+    lpm			    		; R0 <-- (Z)
+    mov r22,r0		
+    
+    rjmp start
+
+Table: 	 	 	 			; table values organized by word
+.DW 0x0100,0x0904,0x1910,0x3124,0x5140 
+.DW 0x7964,0xA990,0xE1C4
+
+
+
+
+
+
+
+;******************************************************************
+;                               EXAMPLE2
+;******************************************************************
+.include "m328PBdef.inc"    ;ATmega328P microcontroller definitions
+    
+; delay = (1000*F1+14) cycles (abougt DEL_mS in mSeconds)
+.equ FOSC_MHZ=16	;MHz
+.equ DEL_mS=1	;mS
+.equ F1=FOSC_MHZ*DEL_mS
+    
+;Init Stack Pointer
+    ldi r24, LOW(RAMEND)
+    out SPL, r24 
+    ldi r24, HIGH(RAMEND)
+    out SPH, r24
+
+;Init PORTΒ as output
+    ser r26         
+    out DDRB, r26 
+
+    ldi r24, low(F1)	    ;   
+    ldi r25, high(F1)	    ;Set delay
+    
+loop1:
+    ser r26 
+    out PORTB, r26
+    rcall delay_outer	    ;  mS
+    clr r26 
+    out PORTB, r26
+    rcall delay_outer	    ;  mS 
+    rjmp loop1
+    
+;this routine is used to produce a delay 993 cycles
+delay_inner:		    
+    ldi	r23, 247	    ; (1 cycle)	
+loop3:
+    dec r23		    	; 1 cycle
+    nop			    ; 1 cycle
+    brne loop3		    ; 1 or 2 cycles
+    nop			    ; 1 cycle
+    ret			    ; 4 cycles
+    
+    
+;this routine is used to produce a delay of (1000*F1+14) cycles
+delay_outer:
+    push r24		    ; (2 cycles)	    
+    push r25		    ; (2 cycles) Save r24:r25  
+    
+loop4:
+    rcall delay_inner	    ; (3+993)=996 cycles
+    sbiw r24 ,1		    ; 2 cycles
+    brne loop4		    ; 1 or 2 cycles
+    
+    pop r25		    ; (2 cycles)
+    pop	r24		    ; (2 cycles) Restore r24:r25
+    ret			    ;4 cycles
+
+
+
+
+
+
+;******************************************************************
+;                               EXAMPLE3
+;******************************************************************
+#define F_CPU 16000000UL
+#include<avr/io.h>
+#include<util/delay.h>
+
+int main()
+{
+    DDRC=0xFF;      //Set PORTB as output
+
+	while(1)
+	{
+	PORTC = 0x00;
+	_delay_ms(500);
+	PORTC = 0xFF;
+	_delay_ms(500);
+	}
+}
