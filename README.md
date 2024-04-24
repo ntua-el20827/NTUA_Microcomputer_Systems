@@ -1,6 +1,7 @@
 # Microcomputer_Systems_Lab_2023
-ΕΜΠ - ΣΗΜΜΥ - Συστήματα Μικρουπολογιστών (6ο Εξάμηνο).
-Λυσεις στις Ομάδες Ασκήσεων και Εργαστηριακές Ασκήσεις. 
-- Γεωργιάδη Δαφνη 
-- Γεωργακόπουλος Γιωργος
-- Νεοφώτιστος Μάνος
+- NTUA - ECE - Microcomputer Systems (6th Semester).
+- Exercises in 8085, Laboratory Exercises in MPLAB and Solutions
+
+- Georgiadi Dafni
+- Georgakopoulos Georgios
+- Neofotistos Manos
